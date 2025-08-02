@@ -71,7 +71,10 @@ function AddButtonNode({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
   return (
     <div className="flex justify-center">
       <Button
-        onClick={() => data.onAdd(data.type)}
+        onClick={() => {
+          console.log('Add button clicked:', data.type);
+          data.onAdd(data.type);
+        }}
         variant="outline"
         size="sm"
         className="rounded-full flex items-center gap-2 shadow-sm"
@@ -109,13 +112,25 @@ export function LabScreen() {
   ]);
 
   const addGoal = useCallback((type: 'input' | 'output') => {
+    console.log('addGoal called with type:', type);
     const newGoal: Goal = {
       id: Date.now().toString(),
       title: type === 'output' ? 'New Output Category' : 'New Input Category',
       goalCount: 0,
       type
     };
-    setGoals(prev => [...prev, newGoal]);
+    
+    setGoals(prev => {
+      if (type === 'output') {
+        // Add output goals at the end
+        return [...prev, newGoal];
+      } else {
+        // Add input goals at the beginning of input goals
+        const outputGoals = prev.filter(g => g.type === 'output');
+        const inputGoals = prev.filter(g => g.type === 'input');
+        return [...outputGoals, newGoal, ...inputGoals];
+      }
+    });
   }, []);
 
   // Create nodes from goals
