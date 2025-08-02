@@ -5,7 +5,6 @@ import { LabScreen } from "./components/LabScreen";
 import { SettingsScreen } from "./components/SettingsScreen";
 import {
   Home,
-  MessageCircle,
   FlaskConical,
   Settings,
 } from "lucide-react";
@@ -25,7 +24,11 @@ export default function App() {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle("dark");
+    if (isDarkMode) {
+      document.documentElement.classList.remove("dark");
+    } else {
+      document.documentElement.classList.add("dark");
+    }
   };
 
   if (!isLoggedIn) {
@@ -51,9 +54,7 @@ export default function App() {
   };
 
   return (
-    <div
-      className={`min-h-screen bg-background ${isDarkMode ? "dark" : ""}`}
-    >
+    <div className={`min-h-screen bg-background ${isDarkMode ? "dark" : ""}`}>
       {/* Status Bar */}
       <div className="flex justify-between items-center p-2 text-xs text-muted-foreground bg-background">
         <span>4:27</span>
