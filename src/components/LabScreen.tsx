@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Plus, MessageCircle, User } from 'lucide-react';
 import { Button } from './ui/button';
 import ReactFlow, { 
@@ -93,7 +93,7 @@ export function LabScreen() {
 
   console.log('Current goals:', goals);
 
-  const addGoal = (type: 'input' | 'output') => {
+  const addGoal = useCallback((type: 'input' | 'output') => {
     console.log('=== ADD GOAL FUNCTION CALLED ===');
     console.log('Type:', type);
     
@@ -127,7 +127,7 @@ export function LabScreen() {
       console.log('New goals array:', newGoals);
       return newGoals;
     });
-  };
+  }, []);
 
   const outputGoals = goals.filter(g => g.type === 'output');
   const inputGoals = goals.filter(g => g.type === 'input');
