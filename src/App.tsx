@@ -3,17 +3,12 @@ import { LoginScreen } from "./components/LoginScreen";
 import { ChatScreen } from "./components/ChatScreen";
 import { LabScreen } from "./components/LabScreen";
 import { SettingsScreen } from "./components/SettingsScreen";
-import {
-  Home,
-  FlaskConical,
-  Settings,
-} from "lucide-react";
+import { Home, FlaskConical, Settings } from "lucide-react";
 
 type Screen = "login" | "chat" | "lab" | "settings";
 
 export default function App() {
-  const [currentScreen, setCurrentScreen] =
-    useState<Screen>("login");
+  const [currentScreen, setCurrentScreen] = useState<Screen>("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -23,12 +18,15 @@ export default function App() {
   };
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    if (isDarkMode) {
-      document.documentElement.classList.remove("dark");
-    } else {
-      document.documentElement.classList.add("dark");
-    }
+    setIsDarkMode(prev => {
+      const newMode = !prev;
+      if (newMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      return newMode;
+    });
   };
 
   if (!isLoggedIn) {
@@ -54,7 +52,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-background ${isDarkMode ? "dark" : ""}`}>
+    <div className="min-h-screen bg-background">
       {/* Status Bar */}
       <div className="flex justify-between items-center p-2 text-xs text-muted-foreground bg-background">
         <span>4:27</span>
@@ -108,4 +106,4 @@ export default function App() {
       </div>
     </div>
   );
-} 
+}
