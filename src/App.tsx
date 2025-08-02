@@ -52,7 +52,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background max-w-sm mx-auto">
       {/* Status Bar */}
       <div className="flex justify-between items-center p-2 text-xs text-muted-foreground bg-background">
         <span>4:27</span>

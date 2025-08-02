@@ -111,7 +111,10 @@ export function SettingsScreen({ isDarkMode, onToggleDarkMode }: SettingsScreenP
 
           <div className="flex items-center justify-between">
             <h3 className="font-medium">Dark Mode</h3>
-            <Switch checked={isDarkMode} onCheckedChange={onToggleDarkMode} />
+            <Switch 
+              checked={isDarkMode} 
+              onCheckedChange={onToggleDarkMode}
+            />
           </div>
         </div>
       </div>
