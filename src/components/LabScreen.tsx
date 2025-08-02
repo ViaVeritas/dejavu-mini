@@ -59,10 +59,6 @@ export function LabScreen() {
     });
   };
 
-  // Filter goals by type - must be declared before calculations
-  const outputGoals = goals.filter(g => g.type === 'output');
-  const inputGoals = goals.filter(g => g.type === 'input');
-
   // Calculate positions for connection lines
   const cardHeight = 80; // Height of each card + margin
   const addButtonHeight = 50; // Height of add button + margin
@@ -71,6 +67,9 @@ export function LabScreen() {
   const outputSectionHeight = (outputGoals.length * cardHeight) + addButtonHeight;
   const hubYPosition = outputSectionHeight + 40; // 40px margin
   const inputStartY = hubYPosition + hubHeight + 40; // 40px margin
+
+  const outputGoals = goals.filter(g => g.type === 'output');
+  const inputGoals = goals.filter(g => g.type === 'input');
 
   console.log('Output goals:', outputGoals);
   console.log('Input goals:', inputGoals);
