@@ -68,15 +68,28 @@ function CentralHubNode() {
 
 // Add Button Node Component
 function AddButtonNode({ data }: { data: { type: 'input' | 'output'; onAdd: (type: 'input' | 'output') => void } }) {
+  console.log('AddButtonNode rendering with data:', data);
+  console.log('AddButtonNode data.type:', data.type);
+  console.log('AddButtonNode data.onAdd:', data.onAdd);
+  console.log('AddButtonNode data.onAdd type:', typeof data.onAdd);
+
   const handleClick = () => {
-    console.log('AddButtonNode clicked, type:', data.type);
-    console.log('onAdd function:', data.onAdd);
+    console.log('=== BUTTON CLICKED ===');
+    console.log('Button clicked for type:', data.type);
+    console.log('data object:', data);
+    console.log('onAdd function exists:', !!data.onAdd);
+    console.log('onAdd function type:', typeof data.onAdd);
+    
     if (data.onAdd) {
+      console.log('Calling onAdd function...');
       data.onAdd(data.type);
+      console.log('onAdd function called successfully');
     } else {
-      console.error('onAdd function is undefined');
+      console.error('ERROR: onAdd function is undefined!');
     }
   };
+
+  console.log('AddButtonNode about to render button');
 
   return (
     <div className="flex justify-center">
@@ -109,6 +122,8 @@ const nodeTypes = {
 };
 
 export function LabScreen() {
+  console.log('=== LabScreen component rendering ===');
+  
   const [goals, setGoals] = useState<Goal[]>([
     { id: '1', title: 'CSE201 Project 4', goalCount: 13, type: 'output' },
     { id: '2', title: 'Complete database overhaul', goalCount: 10, type: 'output' },
@@ -118,9 +133,13 @@ export function LabScreen() {
     { id: '6', title: 'Recreation', goalCount: 3, type: 'input' },
   ]);
 
+  console.log('Current goals state:', goals);
+
   const addGoal = useCallback((type: 'input' | 'output') => {
+    console.log('=== ADD GOAL FUNCTION CALLED ===');
     console.log('addGoal called with type:', type);
-    console.log('Current goals:', goals);
+    console.log('Current goals before update:', goals);
+    
     const newGoal: Goal = {
       id: Date.now().toString(),
       title: type === 'output' ? 'New Output Category' : 'New Input Category',
@@ -128,35 +147,46 @@ export function LabScreen() {
       type
     };
     
-    console.log('Creating new goal:', newGoal);
+    console.log('New goal created:', newGoal);
     
     setGoals(prev => {
-      console.log('Previous goals:', prev);
+      console.log('setGoals callback - Previous goals:', prev);
       if (type === 'output') {
         // Add output goals at the end
         const newGoals = [...prev, newGoal];
-        console.log('New goals (output):', newGoals);
+        console.log('New goals array (output added):', newGoals);
         return newGoals;
       } else {
         // Add input goals at the beginning of input goals
         const outputGoals = prev.filter(g => g.type === 'output');
         const inputGoals = prev.filter(g => g.type === 'input');
         const newGoals = [...outputGoals, newGoal, ...inputGoals];
-        console.log('New goals (input):', newGoals);
+        console.log('Output goals:', outputGoals);
+        console.log('Input goals:', inputGoals);
+        console.log('New goals array (input added):', newGoals);
         return newGoals;
       }
     });
-  }, []);
+    
+    console.log('addGoal function completed');
+  }, [goals]);
 
   // Create nodes from goals
   const createNodes = useCallback((): Node[] => {
+    console.log('=== CREATE NODES FUNCTION CALLED ===');
+    console.log('Creating nodes from goals:', goals);
+    
     const outputGoals = goals.filter(g => g.type === 'output');
     const inputGoals = goals.filter(g => g.type === 'input');
+    
+    console.log('Output goals for nodes:', outputGoals);
+    console.log('Input goals for nodes:', inputGoals);
     
     const nodes: Node[] = [];
     
     // Output goal nodes (positioned above center)
     outputGoals.forEach((goal, index) => {
+      console.log(`Creating output goal node ${index}:`, goal);
       nodes.push({
         id: goal.id,
         type: 'goalCard',
@@ -165,6 +195,9 @@ export function LabScreen() {
       });
     });
     
+    console.log('Creating add-output button node');
+    console.log('addGoal function reference:', addGoal);
+    
     // Add output button
     nodes.push({
       id: 'add-output',
@@ -172,13 +205,11 @@ export function LabScreen() {
       position: { x: -140, y: -300 + (outputGoals.length * 80) },
       data: { 
         type: 'output' as const, 
-        onAdd: (type: 'input' | 'output') => {
-          console.log('Add button data.onAdd called with:', type);
-          addGoal(type);
-        }
+        onAdd: addGoal
       },
     });
     
+    console.log('Creating central hub node');
     // Central hub
     nodes.push({
       id: 'central-hub',
@@ -187,6 +218,7 @@ export function LabScreen() {
       data: {},
     });
     
+    console.log('Creating add-input button node');
     // Add input button
     nodes.push({
       id: 'add-input',
@@ -194,15 +226,13 @@ export function LabScreen() {
       position: { x: -140, y: 100 },
       data: { 
         type: 'input' as const, 
-        onAdd: (type: 'input' | 'output') => {
-          console.log('Add button data.onAdd called with:', type);
-          addGoal(type);
-        }
+        onAdd: addGoal
       },
     });
     
     // Input goal nodes (positioned below center)
     inputGoals.forEach((goal, index) => {
+      console.log(`Creating input goal node ${index}:`, goal);
       nodes.push({
         id: goal.id,
         type: 'goalCard',
@@ -211,6 +241,8 @@ export function LabScreen() {
       });
     });
     
+    console.log('Total nodes created:', nodes.length);
+    console.log('All nodes:', nodes);
     return nodes;
   }, [goals, addGoal]);
 
@@ -273,8 +305,18 @@ export function LabScreen() {
 
   // Update nodes and edges when goals change
   React.useEffect(() => {
-    setNodes(createNodes());
-    setEdges(createEdges());
+    console.log('=== USEEFFECT TRIGGERED ===');
+    console.log('Goals changed, updating nodes and edges');
+    console.log('New goals:', goals);
+    
+    const newNodes = createNodes();
+    const newEdges = createEdges();
+    
+    console.log('Setting new nodes:', newNodes);
+    console.log('Setting new edges:', newEdges);
+    
+    setNodes(newNodes);
+    setEdges(newEdges);
   }, [goals, createNodes, createEdges, setNodes, setEdges]);
 
   const onConnect = useCallback(
