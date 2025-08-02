@@ -239,22 +239,6 @@ export function LabScreen() {
   }, [goals, outputGoals, inputGoals, addGoal]);
 
   return (
-      <div className="max-w-md mx-auto space-y-4">
-        
-        <h1 className="text-xl font-bold text-center mb-6">Lab Screen Debug</h1>
-        
-        {/* Output Goals */}
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold">Output Goals ({outputGoals.length})</h2>
-          {outputGoals.map((goal) => (
-            <div key={goal.id} className="bg-card border-2 border-border rounded-xl p-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-medium text-sm">{goal.title}</h3>
-                <p className="text-xs text-muted-foreground">{goal.goalCount} goals</p>
-              </div>
-              <button className="w-8 h-8 bg-background border border-border rounded-lg flex items-center justify-center">
-                <MessageCircle className="w-4 h-4 text-muted-foreground" />
-              </button>
     <div className="min-h-screen bg-background">
       <div className="h-screen w-full">
         <ReactFlow
@@ -282,9 +266,4 @@ export function LabScreen() {
       </div>
     </div>
   );
-}
-      )
-      )
-      }
-  )
 }
