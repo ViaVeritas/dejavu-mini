@@ -168,7 +168,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-output',
       type: 'addButton',
-      position: { x: 50, y: yPosition },
+      position: { x: 100, y: yPosition },
       data: { type: 'output', onAdd: addGoal },
     });
     
@@ -186,7 +186,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'central-hub',
       type: 'centralHub',
-      position: { x: 200, y: yPosition },
+      position: { x: 300, y: yPosition },
       data: {},
     });
     
@@ -196,7 +196,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-input',
       type: 'addButton',
-      position: { x: 50, y: yPosition },
+      position: { x: 100, y: yPosition },
       data: { type: 'input', onAdd: addGoal },
     });
     
@@ -215,7 +215,7 @@ export function LabScreen() {
       newNodes.push({
         id: `input-${goal.id}`,
         type: 'goalCard',
-        position: { x: 50, y: yPosition },
+        position: { x: 100, y: yPosition },
         data: goal,
       });
       
@@ -239,16 +239,18 @@ export function LabScreen() {
   }, [goals, outputGoals, inputGoals, addGoal]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="h-screen w-full">
+    <div className="min-h-screen bg-background relative">
+      <div className="h-screen w-full relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
+          fitView={false}
+          defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          minZoom={0.5}
+          maxZoom={2}
         >
           <Background />
           <Controls />
@@ -256,7 +258,7 @@ export function LabScreen() {
       </div>
       
       {/* Debug Info - positioned absolutely */}
-      <div className="absolute top-4 right-4 p-4 bg-muted rounded-lg max-w-xs">
+      <div className="absolute top-4 right-4 p-4 bg-muted rounded-lg max-w-xs z-10">
         <h3 className="font-semibold mb-2">Debug Info:</h3>
         <p>Total goals: {goals.length}</p>
         <p>Output goals: {outputGoals.length}</p>
