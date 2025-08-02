@@ -40,56 +40,58 @@ export function LabScreen() {
     }
   };
 
-  // Calculate heights for the vertical lines
-  const outputSectionHeight = (outputGoals.length + 1) * 80; // 80px per item including spacing
-  const inputSectionHeight = (inputGoals.length) * 80;
-  const centralHubY = outputSectionHeight + 40; // Position of central hub
-  const inputStartY = centralHubY + 80; // Start of input section
+  const itemHeight = 88; // Height of each item including spacing
+  const outputSectionHeight = (outputGoals.length + 1) * itemHeight;
+  const centralHubY = outputSectionHeight + 24;
+  const inputStartY = centralHubY + 120;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="max-w-md mx-auto relative px-6 py-6">
+    <div className="min-h-screen bg-background">
+      <div className="max-w-md mx-auto relative px-4 py-6">
         
-        {/* Right-side vertical line for outputs */}
+        {/* Main vertical lines */}
         <div 
-          className="absolute right-6 w-0.5 bg-border" 
+          className="absolute right-4 w-0.5 bg-border z-0" 
           style={{ 
-            top: '24px', 
-            height: `${outputSectionHeight + 60}px` 
+            top: '24px',
+            height: `${outputSectionHeight + 40}px`
           }}
         />
         
-        {/* Left-side vertical line for inputs */}
         <div 
-          className="absolute left-6 w-0.5 bg-border" 
+          className="absolute left-4 w-0.5 bg-border z-0" 
           style={{ 
-            top: `${inputStartY}px`, 
-            height: `${inputSectionHeight}px` 
+            top: `${inputStartY}px`,
+            height: `${inputGoals.length * itemHeight}px`
           }}
         />
 
-        {/* Output Goals */}
-        <div className="space-y-4 mb-8">
+        {/* Output section */}
+        <div className="relative z-10">
           {outputGoals.map((goal, index) => (
-            <div key={goal.id} className="relative">
-              <div className="mr-8">
+            <div 
+              key={goal.id} 
+              className="absolute w-full"
+              style={{ top: `${index * itemHeight}px` }}
+            >
+              {/* Goal card */}
+              <div className="pr-12">
                 <GoalCard goal={goal} />
               </div>
               
-              {/* Horizontal line connecting card to right vertical line */}
+              {/* Horizontal connection line */}
               <div 
-                className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
-                style={{ 
-                  right: '24px',
-                  width: '32px'
-                }}
+                className="absolute top-1/2 right-4 w-8 h-0.5 bg-border transform -translate-y-1/2"
               />
             </div>
           ))}
           
           {/* Add Output Button */}
-          <div className="relative">
-            <div className="flex justify-center mr-8">
+          <div 
+            className="absolute w-full"
+            style={{ top: `${outputGoals.length * itemHeight}px` }}
+          >
+            <div className="pr-12 flex justify-center">
               <Button
                 onClick={() => addGoal('output')}
                 variant="outline"
@@ -103,25 +105,21 @@ export function LabScreen() {
               </Button>
             </div>
             
-            {/* Connection line to right vertical line */}
+            {/* Horizontal connection line */}
             <div 
-              className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
-              style={{ 
-                right: '24px',
-                width: '32px'
-              }}
+              className="absolute top-1/2 right-4 w-8 h-0.5 bg-border transform -translate-y-1/2"
             />
           </div>
         </div>
 
-        {/* Curved connection from right vertical line to central hub */}
+        {/* Curves connecting vertical lines to central hub */}
         <div 
-          className="absolute right-6 w-16 h-16" 
-          style={{ top: `${centralHubY - 16}px` }}
+          className="absolute right-4 w-16 h-16 z-0" 
+          style={{ top: `${centralHubY - 32}px` }}
         >
           <svg width="64" height="64" className="absolute top-0 right-0">
             <path
-              d="M 0 0 Q 32 0 32 32 Q 32 64 64 64"
+              d="M 0 0 Q 0 32 32 32 Q 64 32 64 64"
               stroke="hsl(var(--border))"
               strokeWidth="2"
               fill="none"
@@ -131,29 +129,26 @@ export function LabScreen() {
 
         {/* Central Hub */}
         <div 
-          className="flex justify-center mb-8 relative z-10"
-          style={{ marginTop: '40px' }}
+          className="absolute left-1/2 transform -translate-x-1/2 z-20"
+          style={{ top: `${centralHubY}px` }}
         >
-          <div className="relative">
-            <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative">
-              <User className="w-8 h-8 text-muted-foreground" />
-              
-              {/* Chat Button */}
-              <button className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center">
-                <MessageCircle className="w-3 h-3 text-muted-foreground" />
-              </button>
-            </div>
+          <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative">
+            <User className="w-8 h-8 text-muted-foreground" />
+            
+            {/* Chat Button */}
+            <button className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center">
+              <MessageCircle className="w-3 h-3 text-muted-foreground" />
+            </button>
           </div>
         </div>
 
-        {/* Curved connection from central hub to left vertical line */}
         <div 
-          className="absolute left-6 w-16 h-16" 
-          style={{ top: `${centralHubY + 48}px` }}
+          className="absolute left-4 w-16 h-16 z-0" 
+          style={{ top: `${centralHubY + 32}px` }}
         >
           <svg width="64" height="64" className="absolute top-0 left-0">
             <path
-              d="M 64 0 Q 32 0 32 32 Q 32 64 0 64"
+              d="M 64 0 Q 64 32 32 32 Q 0 32 0 64"
               stroke="hsl(var(--border))"
               strokeWidth="2"
               fill="none"
@@ -162,8 +157,11 @@ export function LabScreen() {
         </div>
 
         {/* Add Input Button */}
-        <div className="relative mb-8">
-          <div className="flex justify-center ml-8">
+        <div 
+          className="absolute w-full z-10"
+          style={{ top: `${inputStartY - itemHeight}px` }}
+        >
+          <div className="pl-12 flex justify-center">
             <Button
               onClick={() => addGoal('input')}
               variant="outline"
@@ -177,35 +175,35 @@ export function LabScreen() {
             </Button>
           </div>
           
-          {/* Connection line to left vertical line */}
+          {/* Horizontal connection line */}
           <div 
-            className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
-            style={{ 
-              left: '24px',
-              width: '32px'
-            }}
+            className="absolute top-1/2 left-4 w-8 h-0.5 bg-border transform -translate-y-1/2"
           />
         </div>
 
         {/* Input Goals */}
-        <div className="space-y-4">
+        <div className="relative z-10">
           {inputGoals.map((goal, index) => (
-            <div key={goal.id} className="relative">
-              <div className="ml-8">
+            <div 
+              key={goal.id} 
+              className="absolute w-full"
+              style={{ top: `${inputStartY + index * itemHeight}px` }}
+            >
+              {/* Goal card */}
+              <div className="pl-12">
                 <GoalCard goal={goal} />
               </div>
               
-              {/* Horizontal line connecting card to left vertical line */}
+              {/* Horizontal connection line */}
               <div 
-                className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
-                style={{ 
-                  left: '24px',
-                  width: '32px'
-                }}
+                className="absolute top-1/2 left-4 w-8 h-0.5 bg-border transform -translate-y-1/2"
               />
             </div>
           ))}
         </div>
+        
+        {/* Add bottom padding to ensure all content is visible */}
+        <div style={{ height: `${inputStartY + inputGoals.length * itemHeight + 100}px` }} />
       </div>
     </div>
   );
