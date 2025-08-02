@@ -1,0 +1,110 @@
+import React, { useState } from "react";
+import { LoginScreen } from "./components/LoginScreen";
+import { ChatScreen } from "./components/ChatScreen";
+import { LabScreen } from "./components/LabScreen";
+import { SettingsScreen } from "./components/SettingsScreen";
+import {
+  Home,
+  MessageCircle,
+  FlaskConical,
+  Settings,
+} from "lucide-react";
+
+type Screen = "login" | "chat" | "lab" | "settings";
+
+export default function App() {
+  const [currentScreen, setCurrentScreen] =
+    useState<Screen>("login");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    setCurrentScreen("chat");
+  };
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+
+  if (!isLoggedIn) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
+
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case "chat":
+        return <ChatScreen />;
+      case "lab":
+        return <LabScreen />;
+      case "settings":
+        return (
+          <SettingsScreen
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={toggleDarkMode}
+          />
+        );
+      default:
+        return <ChatScreen />;
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen bg-background ${isDarkMode ? "dark" : ""}`}
+    >
+      {/* Status Bar */}
+      <div className="flex justify-between items-center p-2 text-xs text-muted-foreground bg-background">
+        <span>4:27</span>
+        <div className="flex items-center gap-1">
+          <span>📶</span>
+          <span>📶</span>
+          <span>🔋</span>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 pb-20">{renderScreen()}</div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+        <div className="flex justify-around items-center py-2">
+          <button
+            onClick={() => setCurrentScreen("chat")}
+            className={`flex flex-col items-center p-2 ${
+              currentScreen === "chat"
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            <Home size={20} />
+            <span className="text-xs mt-1">Home</span>
+          </button>
+          <button
+            onClick={() => setCurrentScreen("lab")}
+            className={`flex flex-col items-center p-2 ${
+              currentScreen === "lab"
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            <FlaskConical size={20} />
+            <span className="text-xs mt-1">Lab</span>
+          </button>
+          <button
+            onClick={() => setCurrentScreen("settings")}
+            className={`flex flex-col items-center p-2 ${
+              currentScreen === "settings"
+                ? "text-primary"
+                : "text-muted-foreground"
+            }`}
+          >
+            <Settings size={20} />
+            <span className="text-xs mt-1">Settings</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+} 
