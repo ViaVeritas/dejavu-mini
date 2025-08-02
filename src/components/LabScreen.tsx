@@ -32,45 +32,64 @@ export function LabScreen() {
     };
     
     if (type === 'input') {
-      // Add input goals at the beginning (top of the list)
       const otherGoals = goals.filter(g => g.type === 'output');
       const existingInputGoals = goals.filter(g => g.type === 'input');
       setGoals([...otherGoals, newGoal, ...existingInputGoals]);
     } else {
-      // Add output goals at the end of output list
       setGoals(prev => [...prev, newGoal]);
     }
   };
 
+  // Calculate heights for the vertical lines
+  const outputSectionHeight = (outputGoals.length + 1) * 80; // 80px per item including spacing
+  const inputSectionHeight = (inputGoals.length) * 80;
+  const centralHubY = outputSectionHeight + 40; // Position of central hub
+  const inputStartY = centralHubY + 80; // Start of input section
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="max-w-md mx-auto relative px-4 py-6">
+      <div className="max-w-md mx-auto relative px-6 py-6">
         
-        {/* Right-side connection line for outputs */}
-        <div className="absolute right-4 top-6 w-0.5 bg-border" style={{ height: `${(outputGoals.length + 1) * 72 + 80}px` }}></div>
+        {/* Right-side vertical line for outputs */}
+        <div 
+          className="absolute right-6 w-0.5 bg-border" 
+          style={{ 
+            top: '24px', 
+            height: `${outputSectionHeight + 60}px` 
+          }}
+        />
         
-        {/* Left-side connection line for inputs */}
-        <div className="absolute left-4 w-0.5 bg-border" style={{ 
-          top: `${(outputGoals.length + 1) * 72 + 160}px`, 
-          height: `${(inputGoals.length + 1) * 72 + 40}px` 
-        }}></div>
+        {/* Left-side vertical line for inputs */}
+        <div 
+          className="absolute left-6 w-0.5 bg-border" 
+          style={{ 
+            top: `${inputStartY}px`, 
+            height: `${inputSectionHeight}px` 
+          }}
+        />
 
         {/* Output Goals */}
         <div className="space-y-4 mb-8">
           {outputGoals.map((goal, index) => (
             <div key={goal.id} className="relative">
-              <div className="pr-12">
+              <div className="mr-8">
                 <GoalCard goal={goal} />
               </div>
               
-              {/* Horizontal line connecting to right side */}
-              <div className="absolute top-1/2 right-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
+              {/* Horizontal line connecting card to right vertical line */}
+              <div 
+                className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
+                style={{ 
+                  right: '24px',
+                  width: '32px'
+                }}
+              />
             </div>
           ))}
           
           {/* Add Output Button */}
           <div className="relative">
-            <div className="flex justify-center pr-12">
+            <div className="flex justify-center mr-8">
               <Button
                 onClick={() => addGoal('output')}
                 variant="outline"
@@ -84,27 +103,38 @@ export function LabScreen() {
               </Button>
             </div>
             
-            {/* Connection to right side */}
-            <div className="absolute top-1/2 right-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
+            {/* Connection line to right vertical line */}
+            <div 
+              className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
+              style={{ 
+                right: '24px',
+                width: '32px'
+              }}
+            />
           </div>
         </div>
 
-        {/* Curved connection from right side to central hub */}
-        <div className="absolute right-4 w-16 h-16" style={{ top: `${(outputGoals.length + 1) * 72 + 64}px` }}>
+        {/* Curved connection from right vertical line to central hub */}
+        <div 
+          className="absolute right-6 w-16 h-16" 
+          style={{ top: `${centralHubY - 16}px` }}
+        >
           <svg width="64" height="64" className="absolute top-0 right-0">
             <path
-              d="M 0 0 Q 0 32 32 32 Q 64 32 64 64"
+              d="M 0 0 Q 32 0 32 32 Q 32 64 64 64"
               stroke="hsl(var(--border))"
-              strokeWidth="1"
+              strokeWidth="2"
               fill="none"
             />
           </svg>
         </div>
 
         {/* Central Hub */}
-        <div className="flex justify-center mb-8 relative z-10">
+        <div 
+          className="flex justify-center mb-8 relative z-10"
+          style={{ marginTop: '40px' }}
+        >
           <div className="relative">
-            {/* Central AI Hub */}
             <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative">
               <User className="w-8 h-8 text-muted-foreground" />
               
@@ -116,13 +146,16 @@ export function LabScreen() {
           </div>
         </div>
 
-        {/* Curved connection from central hub to left side */}
-        <div className="absolute left-4 w-16 h-16" style={{ top: `${(outputGoals.length + 1) * 72 + 128}px` }}>
+        {/* Curved connection from central hub to left vertical line */}
+        <div 
+          className="absolute left-6 w-16 h-16" 
+          style={{ top: `${centralHubY + 48}px` }}
+        >
           <svg width="64" height="64" className="absolute top-0 left-0">
             <path
-              d="M 64 0 Q 64 32 32 32 Q 0 32 0 64"
+              d="M 64 0 Q 32 0 32 32 Q 32 64 0 64"
               stroke="hsl(var(--border))"
-              strokeWidth="1"
+              strokeWidth="2"
               fill="none"
             />
           </svg>
@@ -130,7 +163,7 @@ export function LabScreen() {
 
         {/* Add Input Button */}
         <div className="relative mb-8">
-          <div className="flex justify-center pl-12">
+          <div className="flex justify-center ml-8">
             <Button
               onClick={() => addGoal('input')}
               variant="outline"
@@ -144,20 +177,32 @@ export function LabScreen() {
             </Button>
           </div>
           
-          {/* Connection to left side */}
-          <div className="absolute top-1/2 left-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
+          {/* Connection line to left vertical line */}
+          <div 
+            className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
+            style={{ 
+              left: '24px',
+              width: '32px'
+            }}
+          />
         </div>
 
         {/* Input Goals */}
         <div className="space-y-4">
           {inputGoals.map((goal, index) => (
             <div key={goal.id} className="relative">
-              <div className="pl-12">
+              <div className="ml-8">
                 <GoalCard goal={goal} />
               </div>
               
-              {/* Horizontal line connecting to left side */}
-              <div className="absolute top-1/2 left-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
+              {/* Horizontal line connecting card to left vertical line */}
+              <div 
+                className="absolute top-1/2 bg-border h-0.5 transform -translate-y-1/2"
+                style={{ 
+                  left: '24px',
+                  width: '32px'
+                }}
+              />
             </div>
           ))}
         </div>
