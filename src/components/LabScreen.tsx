@@ -68,13 +68,20 @@ function CentralHubNode() {
 
 // Add Button Node Component
 function AddButtonNode({ data }: { data: { type: 'input' | 'output'; onAdd: (type: 'input' | 'output') => void } }) {
+  const handleClick = () => {
+    console.log('AddButtonNode clicked, type:', data.type);
+    console.log('onAdd function:', data.onAdd);
+    if (data.onAdd) {
+      data.onAdd(data.type);
+    } else {
+      console.error('onAdd function is undefined');
+    }
+  };
+
   return (
     <div className="flex justify-center">
       <Button
-        onClick={() => {
-          console.log('Add button clicked:', data.type);
-          data.onAdd(data.type);
-        }}
+        onClick={handleClick}
         variant="outline"
         size="sm"
         className="rounded-full flex items-center gap-2 shadow-sm"
@@ -113,6 +120,7 @@ export function LabScreen() {
 
   const addGoal = useCallback((type: 'input' | 'output') => {
     console.log('addGoal called with type:', type);
+    console.log('Current goals:', goals);
     const newGoal: Goal = {
       id: Date.now().toString(),
       title: type === 'output' ? 'New Output Category' : 'New Input Category',
@@ -120,15 +128,22 @@ export function LabScreen() {
       type
     };
     
+    console.log('Creating new goal:', newGoal);
+    
     setGoals(prev => {
+      console.log('Previous goals:', prev);
       if (type === 'output') {
         // Add output goals at the end
-        return [...prev, newGoal];
+        const newGoals = [...prev, newGoal];
+        console.log('New goals (output):', newGoals);
+        return newGoals;
       } else {
         // Add input goals at the beginning of input goals
         const outputGoals = prev.filter(g => g.type === 'output');
         const inputGoals = prev.filter(g => g.type === 'input');
-        return [...outputGoals, newGoal, ...inputGoals];
+        const newGoals = [...outputGoals, newGoal, ...inputGoals];
+        console.log('New goals (input):', newGoals);
+        return newGoals;
       }
     });
   }, []);
@@ -155,7 +170,13 @@ export function LabScreen() {
       id: 'add-output',
       type: 'addButton',
       position: { x: -140, y: -300 + (outputGoals.length * 80) },
-      data: { type: 'output' as const, onAdd: addGoal },
+      data: { 
+        type: 'output' as const, 
+        onAdd: (type: 'input' | 'output') => {
+          console.log('Add button data.onAdd called with:', type);
+          addGoal(type);
+        }
+      },
     });
     
     // Central hub
@@ -171,7 +192,13 @@ export function LabScreen() {
       id: 'add-input',
       type: 'addButton',
       position: { x: -140, y: 100 },
-      data: { type: 'input' as const, onAdd: addGoal },
+      data: { 
+        type: 'input' as const, 
+        onAdd: (type: 'input' | 'output') => {
+          console.log('Add button data.onAdd called with:', type);
+          addGoal(type);
+        }
+      },
     });
     
     // Input goal nodes (positioned below center)
