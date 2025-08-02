@@ -1,7 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import ReactFlow, {
+  Node,
+  Edge,
+  addEdge,
+  Connection,
+  useNodesState,
+  useEdgesState,
+  Controls,
+  Background,
+  Handle,
+  Position,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
 import { Plus, MessageCircle, User } from 'lucide-react';
 import { Button } from './ui/button';
-import { GoalCard } from './GoalCard';
 
 interface Goal {
   id: string;
@@ -9,6 +21,82 @@ interface Goal {
   goalCount: number;
   type: 'input' | 'output';
 }
+
+// Custom Goal Card Node Component
+function GoalCardNode({ data }: { data: Goal }) {
+  return (
+    <div className="bg-card border-2 border-border rounded-xl p-4 min-w-[280px] shadow-sm">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="font-medium text-sm">{data.title}</h3>
+          <p className="text-xs text-muted-foreground">{data.goalCount} goals</p>
+        </div>
+        <button className="w-8 h-8 bg-background border border-border rounded-lg flex items-center justify-center">
+          <MessageCircle className="w-4 h-4 text-muted-foreground" />
+        </button>
+      </div>
+      
+      {/* Connection handles */}
+      <Handle
+        type={data.type === 'output' ? 'source' : 'target'}
+        position={data.type === 'output' ? Position.Right : Position.Left}
+        className="w-3 h-3 bg-border border-2 border-background"
+      />
+    </div>
+  );
+}
+
+// Central Hub Node Component
+function CentralHubNode() {
+  return (
+    <div className="relative">
+      <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative shadow-sm">
+        <User className="w-8 h-8 text-muted-foreground" />
+        
+        {/* Chat Button */}
+        <button className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center">
+          <MessageCircle className="w-3 h-3 text-muted-foreground" />
+        </button>
+      </div>
+      
+      {/* Connection handles */}
+      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-border border-2 border-background" />
+      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-border border-2 border-background" />
+    </div>
+  );
+}
+
+// Add Button Node Component
+function AddButtonNode({ data }: { data: { type: 'input' | 'output'; onAdd: (type: 'input' | 'output') => void } }) {
+  return (
+    <div className="flex justify-center">
+      <Button
+        onClick={() => data.onAdd(data.type)}
+        variant="outline"
+        size="sm"
+        className="rounded-full flex items-center gap-2 shadow-sm"
+      >
+        <div className="w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center">
+          <Plus className="w-4 h-4" />
+        </div>
+        add {data.type} category
+      </Button>
+      
+      {/* Connection handle */}
+      <Handle
+        type={data.type === 'output' ? 'source' : 'target'}
+        position={data.type === 'output' ? Position.Right : Position.Left}
+        className="w-3 h-3 bg-border border-2 border-background"
+      />
+    </div>
+  );
+}
+
+const nodeTypes = {
+  goalCard: GoalCardNode,
+  centralHub: CentralHubNode,
+  addButton: AddButtonNode,
+};
 
 export function LabScreen() {
   const [goals, setGoals] = useState<Goal[]>([
@@ -20,147 +108,167 @@ export function LabScreen() {
     { id: '6', title: 'Recreation', goalCount: 3, type: 'input' },
   ]);
 
-  const outputGoals = goals.filter(g => g.type === 'output');
-  const inputGoals = goals.filter(g => g.type === 'input');
-
-  const addGoal = (type: 'input' | 'output') => {
+  const addGoal = useCallback((type: 'input' | 'output') => {
     const newGoal: Goal = {
       id: Date.now().toString(),
       title: type === 'output' ? 'New Output Category' : 'New Input Category',
       goalCount: 0,
       type
     };
+    setGoals(prev => [...prev, newGoal]);
+  }, []);
+
+  // Create nodes from goals
+  const createNodes = useCallback((): Node[] => {
+    const outputGoals = goals.filter(g => g.type === 'output');
+    const inputGoals = goals.filter(g => g.type === 'input');
     
-    if (type === 'input') {
-      // Add input goals at the beginning (top of the list)
-      const otherGoals = goals.filter(g => g.type === 'output');
-      const existingInputGoals = goals.filter(g => g.type === 'input');
-      setGoals([...otherGoals, newGoal, ...existingInputGoals]);
-    } else {
-      // Add output goals at the end of output list
-      setGoals(prev => [...prev, newGoal]);
-    }
-  };
+    const nodes: Node[] = [];
+    
+    // Output goal nodes (positioned above center)
+    outputGoals.forEach((goal, index) => {
+      nodes.push({
+        id: goal.id,
+        type: 'goalCard',
+        position: { x: -140, y: -300 + (index * 80) },
+        data: goal,
+      });
+    });
+    
+    // Add output button
+    nodes.push({
+      id: 'add-output',
+      type: 'addButton',
+      position: { x: -140, y: -300 + (outputGoals.length * 80) },
+      data: { type: 'output' as const, onAdd: addGoal },
+    });
+    
+    // Central hub
+    nodes.push({
+      id: 'central-hub',
+      type: 'centralHub',
+      position: { x: -10, y: 0 },
+      data: {},
+    });
+    
+    // Add input button
+    nodes.push({
+      id: 'add-input',
+      type: 'addButton',
+      position: { x: -140, y: 100 },
+      data: { type: 'input' as const, onAdd: addGoal },
+    });
+    
+    // Input goal nodes (positioned below center)
+    inputGoals.forEach((goal, index) => {
+      nodes.push({
+        id: goal.id,
+        type: 'goalCard',
+        position: { x: -140, y: 180 + (index * 80) },
+        data: goal,
+      });
+    });
+    
+    return nodes;
+  }, [goals, addGoal]);
+
+  // Create edges (connections)
+  const createEdges = useCallback((): Edge[] => {
+    const outputGoals = goals.filter(g => g.type === 'output');
+    const inputGoals = goals.filter(g => g.type === 'input');
+    
+    const edges: Edge[] = [];
+    
+    // Connect output goals to central hub
+    outputGoals.forEach((goal) => {
+      edges.push({
+        id: `${goal.id}-to-hub`,
+        source: goal.id,
+        target: 'central-hub',
+        type: 'smoothstep',
+        style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+        markerEnd: undefined,
+      });
+    });
+    
+    // Connect add output button to central hub
+    edges.push({
+      id: 'add-output-to-hub',
+      source: 'add-output',
+      target: 'central-hub',
+      type: 'smoothstep',
+      style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+      markerEnd: undefined,
+    });
+    
+    // Connect central hub to add input button
+    edges.push({
+      id: 'hub-to-add-input',
+      source: 'central-hub',
+      target: 'add-input',
+      type: 'smoothstep',
+      style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+      markerEnd: undefined,
+    });
+    
+    // Connect central hub to input goals
+    inputGoals.forEach((goal) => {
+      edges.push({
+        id: `hub-to-${goal.id}`,
+        source: 'central-hub',
+        target: goal.id,
+        type: 'smoothstep',
+        style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+        markerEnd: undefined,
+      });
+    });
+    
+    return edges;
+  }, [goals]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(createNodes());
+  const [edges, setEdges, onEdgesChange] = useEdgesState(createEdges());
+
+  // Update nodes and edges when goals change
+  React.useEffect(() => {
+    setNodes(createNodes());
+    setEdges(createEdges());
+  }, [goals, createNodes, createEdges, setNodes, setEdges]);
+
+  const onConnect = useCallback(
+    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="max-w-md mx-auto relative px-4 py-6">
-        
-        {/* Right-side connection line for outputs */}
-        <div className="absolute right-4 top-6 w-0.5 bg-border" style={{ height: `${(outputGoals.length + 1) * 72 + 80}px` }}></div>
-        
-        {/* Left-side connection line for inputs */}
-        <div className="absolute left-4 w-0.5 bg-border" style={{ 
-          top: `${(outputGoals.length + 1) * 72 + 160}px`, 
-          height: `${(inputGoals.length + 1) * 72 + 40}px` 
-        }}></div>
-
-        {/* Output Goals */}
-        <div className="space-y-4 mb-8">
-          {outputGoals.map((goal, index) => (
-            <div key={goal.id} className="relative">
-              <div className="pr-12">
-                <GoalCard goal={goal} />
-              </div>
-              
-              {/* Horizontal line connecting to right side */}
-              <div className="absolute top-1/2 right-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
-            </div>
-          ))}
-          
-          {/* Add Output Button */}
-          <div className="relative">
-            <div className="flex justify-center pr-12">
-              <Button
-                onClick={() => addGoal('output')}
-                variant="outline"
-                size="sm"
-                className="rounded-full flex items-center gap-2"
-              >
-                <div className="w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center">
-                  <Plus className="w-4 h-4" />
-                </div>
-                add output category
-              </Button>
-            </div>
-            
-            {/* Connection to right side */}
-            <div className="absolute top-1/2 right-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
-          </div>
-        </div>
-
-        {/* Curved connection from right side to central hub */}
-        <div className="absolute right-4 w-16 h-16" style={{ top: `${(outputGoals.length + 1) * 72 + 64}px` }}>
-          <svg width="64" height="64" className="absolute top-0 right-0">
-            <path
-              d="M 0 0 Q 0 32 32 32 Q 64 32 64 64"
-              stroke="hsl(var(--border))"
-              strokeWidth="1"
-              fill="none"
-            />
-          </svg>
-        </div>
-
-        {/* Central Hub */}
-        <div className="flex justify-center mb-8 relative z-10">
-          <div className="relative">
-            {/* Central AI Hub */}
-            <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative">
-              <User className="w-8 h-8 text-muted-foreground" />
-              
-              {/* Chat Button */}
-              <button className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center">
-                <MessageCircle className="w-3 h-3 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Curved connection from central hub to left side */}
-        <div className="absolute left-4 w-16 h-16" style={{ top: `${(outputGoals.length + 1) * 72 + 128}px` }}>
-          <svg width="64" height="64" className="absolute top-0 left-0">
-            <path
-              d="M 64 0 Q 64 32 32 32 Q 0 32 0 64"
-              stroke="hsl(var(--border))"
-              strokeWidth="1"
-              fill="none"
-            />
-          </svg>
-        </div>
-
-        {/* Add Input Button */}
-        <div className="relative mb-8">
-          <div className="flex justify-center pl-12">
-            <Button
-              onClick={() => addGoal('input')}
-              variant="outline"
-              size="sm"
-              className="rounded-full flex items-center gap-2"
-            >
-              <div className="w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center">
-                <Plus className="w-4 h-4" />
-              </div>
-              add input category
-            </Button>
-          </div>
-          
-          {/* Connection to left side */}
-          <div className="absolute top-1/2 left-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
-        </div>
-
-        {/* Input Goals */}
-        <div className="space-y-4">
-          {inputGoals.map((goal, index) => (
-            <div key={goal.id} className="relative">
-              <div className="pl-12">
-                <GoalCard goal={goal} />
-              </div>
-              
-              {/* Horizontal line connecting to left side */}
-              <div className="absolute top-1/2 left-4 w-8 h-0.5 bg-border transform -translate-y-1/2"></div>
-            </div>
-          ))}
-        </div>
+    <div className="min-h-screen bg-background">
+      <div className="h-screen w-full">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          nodeTypes={nodeTypes}
+          fitView
+          fitViewOptions={{
+            padding: 0.2,
+            includeHiddenNodes: false,
+          }}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+          minZoom={0.5}
+          maxZoom={1.5}
+          nodesDraggable={false}
+          nodesConnectable={false}
+          elementsSelectable={false}
+          panOnDrag={false}
+          zoomOnScroll={false}
+          zoomOnPinch={false}
+          zoomOnDoubleClick={false}
+          className="bg-background"
+        >
+          <Background color="hsl(var(--border))" gap={20} size={1} />
+        </ReactFlow>
       </div>
     </div>
   );
