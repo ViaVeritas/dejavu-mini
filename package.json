@@ -1,6 +1,7 @@
 {
   "name": "dejavu-mini",
   "version": "0.1.0",
+  "type": "module",
   "description": "A mental wellness/productivity mobile app that helps users maintain consistency by connecting with their future self",
   "private": true,
   "scripts": {
