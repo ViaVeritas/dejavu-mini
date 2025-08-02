@@ -59,6 +59,15 @@ export function LabScreen() {
     });
   };
 
+  // Calculate positions for connection lines
+  const cardHeight = 80; // Height of each card + margin
+  const addButtonHeight = 50; // Height of add button + margin
+  const hubHeight = 80; // Height of central hub
+  
+  const outputSectionHeight = (outputGoals.length * cardHeight) + addButtonHeight;
+  const hubYPosition = outputSectionHeight + 40; // 40px margin
+  const inputStartY = hubYPosition + hubHeight + 40; // 40px margin
+
   const outputGoals = goals.filter(g => g.type === 'output');
   const inputGoals = goals.filter(g => g.type === 'input');
 
@@ -66,13 +75,91 @@ export function LabScreen() {
   console.log('Input goals:', inputGoals);
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-4 relative">
       <div className="max-w-md mx-auto space-y-4">
+        
+        {/* SVG Connection Lines */}
+        <svg 
+          className="absolute inset-0 pointer-events-none z-0" 
+          style={{ width: '100%', height: '100%' }}
+        >
+          <defs>
+            <marker
+              id="arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="9"
+              refY="3.5"
+              orient="auto"
+            >
+              <polygon
+                points="0 0, 10 3.5, 0 7"
+                fill="hsl(var(--border))"
+              />
+            </marker>
+          </defs>
+          
+          {/* Output goal connections */}
+          {outputGoals.map((goal, index) => {
+            const startY = 16 + (index * cardHeight) + 40; // 16px padding + card center
+            const endY = hubYPosition + 40; // Hub center
+            const midY = (startY + endY) / 2;
+            
+            return (
+              <path
+                key={`output-${goal.id}`}
+                d={`M 300 ${startY} Q 350 ${startY} 350 ${midY} Q 350 ${endY} 200 ${endY}`}
+                stroke="hsl(var(--border))"
+                strokeWidth="2"
+                fill="none"
+                markerEnd="url(#arrowhead)"
+              />
+            );
+          })}
+          
+          {/* Add output button connection */}
+          {outputGoals.length > 0 && (
+            <path
+              d={`M 200 ${16 + (outputGoals.length * cardHeight) + 25} Q 350 ${16 + (outputGoals.length * cardHeight) + 25} 350 ${hubYPosition + 20} Q 350 ${hubYPosition + 40} 200 ${hubYPosition + 40}`}
+              stroke="hsl(var(--border))"
+              strokeWidth="2"
+              fill="none"
+              strokeDasharray="5,5"
+            />
+          )}
+          
+          {/* Input goal connections */}
+          {inputGoals.map((goal, index) => {
+            const startY = inputStartY + (index * cardHeight) + 40; // Card center
+            const endY = hubYPosition + 40; // Hub center
+            const midY = (startY + endY) / 2;
+            
+            return (
+              <path
+                key={`input-${goal.id}`}
+                d={`M 100 ${startY} Q 50 ${startY} 50 ${midY} Q 50 ${endY} 200 ${endY}`}
+                stroke="hsl(var(--border))"
+                strokeWidth="2"
+                fill="none"
+                markerEnd="url(#arrowhead)"
+              />
+            );
+          })}
+          
+          {/* Add input button connection */}
+          <path
+            d={`M 200 ${inputStartY - 25} Q 50 ${inputStartY - 25} 50 ${hubYPosition + 60} Q 50 ${hubYPosition + 40} 200 ${hubYPosition + 40}`}
+            stroke="hsl(var(--border))"
+            strokeWidth="2"
+            fill="none"
+            strokeDasharray="5,5"
+          />
+        </svg>
         
         <h1 className="text-xl font-bold text-center mb-6">Lab Screen Debug</h1>
         
         {/* Output Goals */}
-        <div className="space-y-3">
+        <div className="space-y-3 relative z-10">
           <h2 className="text-lg font-semibold">Output Goals ({outputGoals.length})</h2>
           {outputGoals.map((goal) => (
             <div key={goal.id} className="bg-card border-2 border-border rounded-xl p-4 flex items-center justify-between">
@@ -103,7 +190,7 @@ export function LabScreen() {
         </div>
 
         {/* Central Hub */}
-        <div className="flex justify-center my-8">
+        <div className="flex justify-center my-8 relative z-10">
           <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative">
             <User className="w-8 h-8 text-muted-foreground" />
             <button className="absolute -top-2 -right-2 w-6 h-6 bg-card border border-border rounded-full flex items-center justify-center">
@@ -113,7 +200,7 @@ export function LabScreen() {
         </div>
 
         {/* Input Goals */}
-        <div className="space-y-3">
+        <div className="space-y-3 relative z-10">
           <Button
             onClick={() => {
               console.log('=== INPUT BUTTON CLICKED ===');
