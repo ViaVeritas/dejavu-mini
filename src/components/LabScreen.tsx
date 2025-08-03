@@ -27,12 +27,13 @@ interface Goal {
 const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
   const { goal } = data;
   const handlePosition = goal.type === 'output' ? Position.Left : Position.Right;
-  const handleId = goal.type === 'output' ? 'source-left' : 'source-right';
+  const handleType = goal.type === 'output' ? 'target' : 'source';
+  const handleId = goal.type === 'output' ? 'target-left' : 'source-right';
 
   return (
     <div className="relative">
       <Handle
-        type="source"
+        type={handleType}
         position={handlePosition}
         id={handleId}
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
@@ -77,11 +78,11 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
 const CentralHubNode = () => {
   return (
     <div className="relative">
-      {/* Handles for output flow (left side) */}
+      {/* Handles for output flow (left side) - hub sends to outputs */}
       <Handle
-        type="target"
+        type="source"
         position={Position.Left}
-        id="target-from-output-goals"
+        id="source-to-output-goals"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
       <Handle
@@ -91,7 +92,7 @@ const CentralHubNode = () => {
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
       
-      {/* Handles for input flow (right side) */}
+      {/* Handles for input flow (right side) - hub receives from inputs */}
       <Handle
         type="target"
         position={Position.Right}
@@ -186,24 +187,28 @@ export function LabScreen() {
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
     
-    // Create output goal nodes (left side)
+    const centerX = 400;
+    let currentY = 100;
+    const nodeSpacing = 80;
+    
+    // Create output goal nodes (vertical layout)
     outputGoals.forEach((goal, index) => {
       const nodeId = `output-${goal.id}`;
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: 50, y: 100 + index * 80 },
+        position: { x: centerX, y: currentY },
         data: { goal },
       });
       
-      // Connect from output to central hub (left to center)
+      // Connect from central hub to output (hub sends to output)
       newEdges.push({
-        id: `edge-${nodeId}-to-hub`,
-        source: nodeId,
-        target: 'central-hub',
+        id: `edge-hub-to-${nodeId}`,
+        source: 'central-hub',
+        target: nodeId,
         type: 'smoothstep',
-        sourceHandle: 'source-left',
-        targetHandle: 'target-from-output-goals',
+        sourceHandle: 'source-to-output-goals',
+        targetHandle: 'target-left',
         style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -212,20 +217,21 @@ export function LabScreen() {
           color: 'hsl(var(--border))',
         },
       });
+      
+      currentY += nodeSpacing;
     });
     
-    // Add output button (left side)
-    const outputButtonY = 100 + outputGoals.length * 80;
+    // Add output button
     newNodes.push({
       id: 'add-output',
       type: 'addButton',
-      position: { x: 50, y: outputButtonY },
+      position: { x: centerX, y: currentY },
       data: { type: 'output' as const, onAdd: addGoal },
     });
     
-    // Connect from central hub to output button (center to left) - REVERSED
+    // Connect from central hub to output button
     newEdges.push({
-      id: 'edge-add-output-to-hub',
+      id: 'edge-hub-to-add-output',
       source: 'central-hub',
       target: 'add-output',
       type: 'smoothstep',
@@ -240,27 +246,29 @@ export function LabScreen() {
       },
     });
     
-    // Central hub (center)
-    const centralHubY = Math.max(outputButtonY + 80, 300);
+    currentY += nodeSpacing;
+    
+    // Central hub
     newNodes.push({
       id: 'central-hub',
       type: 'centralHub',
-      position: { x: 400, y: centralHubY },
+      position: { x: centerX, y: currentY },
       data: {},
     });
     
-    // Add input button (right side)
-    const inputButtonY = centralHubY + 100;
+    currentY += nodeSpacing;
+    
+    // Add input button
     newNodes.push({
       id: 'add-input',
       type: 'addButton',
-      position: { x: 750, y: inputButtonY },
+      position: { x: centerX, y: currentY },
       data: { type: 'input' as const, onAdd: addGoal },
     });
     
-    // Connect from input button to central hub (right to center) - REVERSED
+    // Connect from central hub to input button
     newEdges.push({
-      id: 'edge-hub-to-add-input', 
+      id: 'edge-hub-to-add-input',
       source: 'central-hub',
       target: 'add-input',
       type: 'smoothstep',
@@ -275,19 +283,21 @@ export function LabScreen() {
       },
     });
     
-    // Create input goal nodes (right side)
+    currentY += nodeSpacing;
+    
+    // Create input goal nodes (vertical layout)
     inputGoals.forEach((goal, index) => {
       const nodeId = `input-${goal.id}`;
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: 750, y: inputButtonY + 80 + index * 80 },
+        position: { x: centerX, y: currentY },
         data: { goal },
       });
       
-      // Connect from input to central hub (right to center) - REVERSED
+      // Connect from input to central hub (input sends to hub)
       newEdges.push({
-        id: `edge-hub-to-${nodeId}`,
+        id: `edge-${nodeId}-to-hub`,
         source: nodeId,
         target: 'central-hub',
         type: 'smoothstep',
@@ -301,6 +311,8 @@ export function LabScreen() {
           color: 'hsl(var(--border))',
         },
       });
+      
+      currentY += nodeSpacing;
     });
     
     setNodes(newNodes);
