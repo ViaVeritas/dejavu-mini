@@ -3,14 +3,17 @@ import { LoginScreen } from "./components/LoginScreen";
 import { ChatScreen } from "./components/ChatScreen";
 import { LabScreen } from "./components/LabScreen";
 import { SettingsScreen } from "./components/SettingsScreen";
+import { GoalDetailScreen } from "./components/GoalDetailScreen";
 import { Home, FlaskConical, Settings } from "lucide-react";
+import { Goal } from "./types/Goal";
 
-type Screen = "login" | "chat" | "lab" | "settings";
+type Screen = "login" | "chat" | "lab" | "settings" | "goalDetail";
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("login");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState<Goal | null>(null);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -29,6 +32,16 @@ export default function App() {
     });
   };
 
+  const handleGoalSelect = (goal: Goal) => {
+    setSelectedGoal(goal);
+    setCurrentScreen("goalDetail");
+  };
+
+  const handleBackFromGoalDetail = () => {
+    setSelectedGoal(null);
+    setCurrentScreen("lab");
+  };
+
   if (!isLoggedIn) {
     return <LoginScreen onLogin={handleLogin} />;
   }
@@ -38,7 +51,16 @@ export default function App() {
       case "chat":
         return <ChatScreen />;
       case "lab":
-        return <LabScreen />;
+        return <LabScreen onGoalSelect={handleGoalSelect} />;
+      case "goalDetail":
+        return selectedGoal ? (
+          <GoalDetailScreen 
+            goal={selectedGoal} 
+            onBack={handleBackFromGoalDetail}
+          />
+        ) : (
+          <LabScreen onGoalSelect={handleGoalSelect} />
+        );
       case "settings":
         return (
           <SettingsScreen
@@ -47,7 +69,7 @@ export default function App() {
           />
         );
       default:
-        return <ChatScreen />;
+        return <LabScreen onGoalSelect={handleGoalSelect} />;
     }
   };
 

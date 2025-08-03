@@ -15,12 +15,11 @@ import 'reactflow/dist/style.css';
 import { Plus, MessageCircle, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { GoalCard } from './GoalCard';
+import { CategoryChatPanel } from './CategoryChatPanel';
+import { Goal } from '../types/Goal';
 
-interface Goal {
-  id: string;
-  title: string;
-  goalCount: number;
-  type: 'input' | 'output';
+interface LabScreenProps {
+  onGoalSelect: (goal: Goal) => void;
 }
 
 // Custom Node Components
@@ -38,7 +37,11 @@ const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
         id={handleId}
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
-      <GoalCard goal={goal} />
+      <GoalCard 
+        goal={goal} 
+        onChatClick={data.onChatClick}
+        onCardClick={data.onCardClick}
+      />
     </div>
   );
 };
@@ -122,7 +125,7 @@ const nodeTypes: NodeTypes = {
   centralHub: CentralHubNode,
 };
 
-export function LabScreen() {
+export function LabScreen({ onGoalSelect }: LabScreenProps) {
   // Load initial state from localStorage or use default
   const [goals, setGoals] = useState<Goal[]>(() => {
     const saved = localStorage.getItem('dejavu-lab-goals');
@@ -145,6 +148,8 @@ export function LabScreen() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [chatPanelOpen, setChatPanelOpen] = useState(false);
+  const [selectedChatGoal, setSelectedChatGoal] = useState<Goal | null>(null);
 
   // Save goals to localStorage whenever they change
   useEffect(() => {
@@ -179,6 +184,17 @@ export function LabScreen() {
     });
   }, []);
 
+  // Handle chat panel opening
+  const handleChatClick = useCallback((goal: Goal) => {
+    setSelectedChatGoal(goal);
+    setChatPanelOpen(true);
+  }, []);
+
+  // Handle goal card click for navigation
+  const handleCardClick = useCallback((goal: Goal) => {
+    onGoalSelect(goal);
+  }, [onGoalSelect]);
+
   // Generate nodes and edges from goals state
   useEffect(() => {
     const outputGoals = goals.filter(g => g.type === 'output');
@@ -198,7 +214,7 @@ export function LabScreen() {
         id: nodeId,
         type: 'goalCard',
         position: { x: centerX - 264, y: currentY },
-        data: { goal },
+        data: { goal, onChatClick: handleChatClick, onCardClick: handleCardClick },
       });
       
       // Connect from central hub to output (hub sends to output)
@@ -292,7 +308,7 @@ export function LabScreen() {
         id: nodeId,
         type: 'goalCard',
         position: { x: centerX + 40, y: currentY },
-        data: { goal },
+        data: { goal, onChatClick: handleChatClick, onCardClick: handleCardClick },
       });
       
       // Connect from input to central hub (input sends to hub)
@@ -317,24 +333,32 @@ export function LabScreen() {
     
     setNodes(newNodes);
     setEdges(newEdges);
-  }, [goals, addGoal, setNodes, setEdges]);
+  }, [goals, addGoal, setNodes, setEdges, handleChatClick, handleCardClick]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="h-screen">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-        >
-          <Controls />
-          <Background />
-        </ReactFlow>
+    <>
+      <div className="min-h-screen bg-background">
+        <div className="h-screen">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            nodeTypes={nodeTypes}
+            fitView
+            fitViewOptions={{ padding: 0.2 }}
+          >
+            <Controls />
+            <Background />
+          </ReactFlow>
+        </div>
       </div>
-    </div>
+      
+      <CategoryChatPanel
+        isOpen={chatPanelOpen}
+        onClose={() => setChatPanelOpen(false)}
+        goal={selectedChatGoal}
+      />
+    </>
   );
 }
