@@ -192,11 +192,11 @@ export function LabScreen() {
       // Connect from output to central hub (left to center)
       newEdges.push({
         id: `edge-${nodeId}-to-hub`,
-        source: nodeId,
-        target: 'central-hub',
+        source: 'central-hub',
+        target: nodeId,
         type: 'smoothstep',
-        sourceHandle: 'right',
-        targetHandle: 'left',
+        sourceHandle: 'left',
+        targetHandle: 'right',
         style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -210,19 +210,20 @@ export function LabScreen() {
     // Add output button (left side)
     const outputButtonY = 100 + outputGoals.length * 80;
     newNodes.push({
+      id: 'add-output',
       type: 'addButton',
       position: { x: 50, y: outputButtonY },
       data: { type: 'output' as const, onAdd: addGoal },
     });
     
-    // Connect output button to central hub (left to center)
+    // Connect from central hub to output button (center to left) - REVERSED
     newEdges.push({
       id: 'edge-add-output-to-hub',
-      source: 'add-output',
-      target: 'central-hub',
+      source: 'central-hub',
+      target: 'add-output',
       type: 'smoothstep',
-      sourceHandle: 'right',
-      targetHandle: 'left',
+      sourceHandle: 'left',
+      targetHandle: 'right',
       style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -244,19 +245,20 @@ export function LabScreen() {
     // Add input button (right side)
     const inputButtonY = centralHubY + 100;
     newNodes.push({
+      id: 'add-input',
       type: 'addButton',
       position: { x: 750, y: inputButtonY },
       data: { type: 'input' as const, onAdd: addGoal },
     });
     
-    // Connect from central hub to input button (center to right)
+    // Connect from input button to central hub (right to center) - REVERSED
     newEdges.push({
       id: 'edge-hub-to-add-input', 
-      source: 'central-hub',
-      target: 'add-input',
+      source: 'add-input',
+      target: 'central-hub',
       type: 'smoothstep',
-      sourceHandle: 'right',
-      targetHandle: 'left',
+      sourceHandle: 'left',
+      targetHandle: 'right',
       style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -276,14 +278,14 @@ export function LabScreen() {
         data: { goal },
       });
       
-      // Connect from central hub to input (center to right)
+      // Connect from input to central hub (right to center) - REVERSED
       newEdges.push({
         id: `edge-hub-to-${nodeId}`,
-        source: 'central-hub',
-        target: nodeId,
+        source: nodeId,
+        target: 'central-hub',
         type: 'smoothstep',
-        sourceHandle: 'right',
-        targetHandle: 'left',
+        sourceHandle: 'left',
+        targetHandle: 'right',
         style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
