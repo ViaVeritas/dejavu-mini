@@ -27,18 +27,18 @@ interface Goal {
 const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
   return (
     <div className="relative">
-      {/* Left handle for inputs, right handle for outputs */}
+      {/* Both left and right source handles */}
       <Handle
-        type="target"
+        type="source"
         position={Position.Left}
-        id="left"
+        id="left-source"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
       <GoalCard goal={data.goal} />
       <Handle
         type="source"
         position={Position.Right}
-        id="right"
+        id="right-source"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
     </div>
@@ -53,11 +53,11 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
 
   return (
     <div className="relative">
-      {/* Left handle for inputs, right handle for outputs */}
+      {/* Both left and right target handles */}
       <Handle
         type="target"
         position={Position.Left}
-        id="left"
+        id="left-target"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
       <Button
@@ -72,9 +72,9 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
         add {data.type} category
       </Button>
       <Handle
-        type="source"
+        type="target"
         position={Position.Right}
-        id="right"
+        id="right-target"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
     </div>
@@ -84,18 +84,30 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
 const CentralHubNode = () => {
   return (
     <div className="relative">
-      {/* Left handle for receiving from outputs */}
+      {/* Left side handles */}
       <Handle
         type="target"
         position={Position.Left}
-        id="left"
+        id="target-from-output-goals"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
-      {/* Right handle for sending to inputs */}
+      <Handle
+        type="source"
+        position={Position.Left}
+        id="source-to-add-output-button"
+        style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
+      />
+      {/* Right side handles */}
+      <Handle
+        type="target"
+        position={Position.Right}
+        id="target-from-input-goals"
+        style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
+      />
       <Handle
         type="source"
         position={Position.Right}
-        id="right"
+        id="source-to-add-input-button"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
       <div className="w-20 h-16 bg-card border-2 border-border rounded-xl flex items-center justify-center relative">
@@ -189,14 +201,14 @@ export function LabScreen() {
         data: { goal },
       });
       
-      // Connect from output to central hub (left to center)
+      // Connect from output goal (right side) to central hub (left side)
       newEdges.push({
-        id: `edge-${nodeId}-to-hub`,
-        source: 'central-hub',
-        target: nodeId,
+        id: `edge-${nodeId}-to-hub`, 
+        source: nodeId,
+        target: 'central-hub',
         type: 'smoothstep',
-        sourceHandle: 'left',
-        targetHandle: 'right',
+        sourceHandle: 'right-source',
+        targetHandle: 'target-from-output-goals',
         style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
@@ -216,14 +228,14 @@ export function LabScreen() {
       data: { type: 'output' as const, onAdd: addGoal },
     });
     
-    // Connect from central hub to output button (center to left) - REVERSED
+    // Connect from central hub (left side) to add output button (right side)
     newEdges.push({
-      id: 'edge-add-output-to-hub',
+      id: 'edge-hub-to-add-output',
       source: 'central-hub',
       target: 'add-output',
       type: 'smoothstep',
-      sourceHandle: 'left',
-      targetHandle: 'right',
+      sourceHandle: 'source-to-add-output-button',
+      targetHandle: 'right-target',
       style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -251,14 +263,14 @@ export function LabScreen() {
       data: { type: 'input' as const, onAdd: addGoal },
     });
     
-    // Connect from input button to central hub (right to center) - REVERSED
+    // Connect from central hub (right side) to add input button (left side)
     newEdges.push({
-      id: 'edge-hub-to-add-input', 
-      source: 'add-input',
-      target: 'central-hub',
+      id: 'edge-hub-to-add-input',
+      source: 'central-hub',
+      target: 'add-input',
       type: 'smoothstep',
-      sourceHandle: 'left',
-      targetHandle: 'right',
+      sourceHandle: 'source-to-add-input-button',
+      targetHandle: 'left-target',
       style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
@@ -278,14 +290,14 @@ export function LabScreen() {
         data: { goal },
       });
       
-      // Connect from input to central hub (right to center) - REVERSED
+      // Connect from input goal (left side) to central hub (right side)
       newEdges.push({
-        id: `edge-hub-to-${nodeId}`,
+        id: `edge-${nodeId}-to-hub`,
         source: nodeId,
         target: 'central-hub',
         type: 'smoothstep',
-        sourceHandle: 'left',
-        targetHandle: 'right',
+        sourceHandle: 'left-source',
+        targetHandle: 'target-from-input-goals',
         style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
         markerEnd: {
           type: MarkerType.ArrowClosed,
