@@ -45,7 +45,7 @@ const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
 
 const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (type: 'input' | 'output') => void } }) => {
   const handlePosition = data.type === 'output' ? Position.Left : Position.Right;
-  const handleId = data.type === 'output' ? 'target-left' : 'target-right';
+  const handleId = data.type === 'output' ? 'target-left' : 'source-right';
 
   const handleClick = useCallback(() => {
     console.log('AddButtonNode clicked:', data.type);
@@ -55,7 +55,7 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
   return (
     <div className="relative">
       <Handle
-        type="target"
+        type={data.type === 'output' ? 'target' : 'source'}
         position={handlePosition}
         id={handleId}
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
