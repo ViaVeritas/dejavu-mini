@@ -197,7 +197,7 @@ export function LabScreen() {
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: centerX - 112, y: currentY },
+        position: { x: centerX - 264, y: currentY },
         data: { goal },
       });
       
@@ -225,7 +225,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-output',
       type: 'addButton',
-      position: { x: centerX - 112, y: currentY },
+      position: { x: centerX - 264, y: currentY },
       data: { type: 'output' as const, onAdd: addGoal },
     });
     
@@ -252,7 +252,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'central-hub',
       type: 'centralHub',
-      position: { x: centerX - 10, y: currentY },
+      position: { x: centerX - 40, y: currentY },
       data: {},
     });
     
@@ -262,7 +262,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-input',
       type: 'addButton',
-      position: { x: centerX + 56, y: currentY },
+      position: { x: centerX + 40, y: currentY },
       data: { type: 'input' as const, onAdd: addGoal },
     });
     
@@ -291,7 +291,7 @@ export function LabScreen() {
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: centerX + 56, y: currentY },
+        position: { x: centerX + 40, y: currentY },
         data: { goal },
       });
       
