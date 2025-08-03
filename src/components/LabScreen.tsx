@@ -15,8 +15,6 @@ import 'reactflow/dist/style.css';
 import { Plus, MessageCircle, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { GoalCard } from './GoalCard';
-import { CategoryChatPanel } from './CategoryChatPanel';
-import { GoalDetailScreen } from './GoalDetailScreen';
 
 interface Goal {
   id: string;
@@ -25,29 +23,12 @@ interface Goal {
   type: 'input' | 'output';
 }
 
-interface LabScreenProps {
-  onNavigateToGoalDetail?: (goal: Goal) => void;
-}
-
-export function LabScreen({ onNavigateToGoalDetail }: LabScreenProps) {
-  const [selectedChatGoal, setSelectedChatGoal] = useState<Goal | null>(null);
-  const [selectedDetailGoal, setSelectedDetailGoal] = useState<Goal | null>(null);
-
 // Custom Node Components
 const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
   const { goal } = data;
   const handlePosition = goal.type === 'output' ? Position.Left : Position.Right;
   const handleType = goal.type === 'output' ? 'target' : 'source';
   const handleId = goal.type === 'output' ? 'target-left' : 'source-right';
-
-  const handleChatClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setSelectedChatGoal(goal);
-  };
-
-  const handleCardClick = () => {
-    setSelectedDetailGoal(goal);
-  };
 
   return (
     <div className="relative">
@@ -57,11 +38,7 @@ const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
         id={handleId}
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
-      <GoalCard 
-        goal={goal} 
-        onChatClick={handleChatClick}
-        onCardClick={handleCardClick}
-      />
+      <GoalCard goal={goal} />
     </div>
   );
 };
@@ -145,6 +122,7 @@ const nodeTypes: NodeTypes = {
   centralHub: CentralHubNode,
 };
 
+export function LabScreen() {
   // Load initial state from localStorage or use default
   const [goals, setGoals] = useState<Goal[]>(() => {
     const saved = localStorage.getItem('dejavu-lab-goals');
@@ -341,23 +319,8 @@ const nodeTypes: NodeTypes = {
     setEdges(newEdges);
   }, [goals, addGoal, setNodes, setEdges]);
 
-  // Handle goal detail navigation
-  const handleGoalDetailBack = () => {
-    setSelectedDetailGoal(null);
-  };
-
-  // If a goal detail is selected, show the detail screen
-  if (selectedDetailGoal) {
-    return (
-      <GoalDetailScreen 
-        goal={selectedDetailGoal} 
-        onBack={handleGoalDetailBack}
-      />
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background">
       <div className="h-screen">
         <ReactFlow
           nodes={nodes}
@@ -372,15 +335,6 @@ const nodeTypes: NodeTypes = {
           <Background />
         </ReactFlow>
       </div>
-      
-      {/* Category Chat Panel */}
-      {selectedChatGoal && (
-        <CategoryChatPanel
-          goal={selectedChatGoal}
-          isOpen={!!selectedChatGoal}
-          onClose={() => setSelectedChatGoal(null)}
-        />
-      )}
     </div>
   );
 }

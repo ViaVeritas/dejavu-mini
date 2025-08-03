@@ -38,7 +38,7 @@ export default function App() {
       case "chat":
         return <ChatScreen />;
       case "lab":
-        return <LabScreen onNavigateToGoalDetail={() => {}} />;
+        return <LabScreen />;
       case "settings":
         return (
           <SettingsScreen
