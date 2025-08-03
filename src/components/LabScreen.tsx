@@ -15,6 +15,8 @@ import 'reactflow/dist/style.css';
 import { Plus, MessageCircle, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { GoalCard } from './GoalCard';
+import { CategoryChatPanel } from './CategoryChatPanel';
+import { GoalDetailScreen } from './GoalDetailScreen';
 
 interface Goal {
   id: string;
@@ -22,6 +24,14 @@ interface Goal {
   goalCount: number;
   type: 'input' | 'output';
 }
+
+interface LabScreenProps {
+  onNavigateToGoalDetail?: (goal: Goal) => void;
+}
+
+export function LabScreen({ onNavigateToGoalDetail }: LabScreenProps) {
+  const [selectedChatGoal, setSelectedChatGoal] = useState<Goal | null>(null);
+  const [selectedDetailGoal, setSelectedDetailGoal] = useState<Goal | null>(null);
 
 // Custom Node Components
 const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
@@ -38,7 +48,11 @@ const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
         id={handleId}
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
-      <GoalCard goal={goal} />
+      <GoalCard 
+        goal={goal} 
+        onChatClick={setSelectedChatGoal}
+        onCardClick={setSelectedDetailGoal}
+      />
     </div>
   );
 };
@@ -122,7 +136,6 @@ const nodeTypes: NodeTypes = {
   centralHub: CentralHubNode,
 };
 
-export function LabScreen() {
   // Load initial state from localStorage or use default
   const [goals, setGoals] = useState<Goal[]>(() => {
     const saved = localStorage.getItem('dejavu-lab-goals');
@@ -319,8 +332,23 @@ export function LabScreen() {
     setEdges(newEdges);
   }, [goals, addGoal, setNodes, setEdges]);
 
+  // Handle goal detail navigation
+  const handleGoalDetailBack = () => {
+    setSelectedDetailGoal(null);
+  };
+
+  // If a goal detail is selected, show the detail screen
+  if (selectedDetailGoal) {
+    return (
+      <GoalDetailScreen 
+        goal={selectedDetailGoal} 
+        onBack={handleGoalDetailBack}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
       <div className="h-screen">
         <ReactFlow
           nodes={nodes}
@@ -335,6 +363,15 @@ export function LabScreen() {
           <Background />
         </ReactFlow>
       </div>
+      
+      {/* Category Chat Panel */}
+      {selectedChatGoal && (
+        <CategoryChatPanel
+          goal={selectedChatGoal}
+          isOpen={!!selectedChatGoal}
+          onClose={() => setSelectedChatGoal(null)}
+        />
+      )}
     </div>
   );
 }
