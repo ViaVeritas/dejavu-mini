@@ -59,6 +59,10 @@ export function GoalDetailScreen({ goal, onBack }: GoalDetailScreenProps) {
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [newGoalDescription, setNewGoalDescription] = useState('');
   const [newGoalDeadline, setNewGoalDeadline] = useState('');
+  const [editingGoal, setEditingGoal] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editDeadline, setEditDeadline] = useState('');
 
   const completedGoals = individualGoals.filter(g => g.completed);
   const progressPercentage = (completedGoals.length / individualGoals.length) * 100;
@@ -92,6 +96,42 @@ export function GoalDetailScreen({ goal, onBack }: GoalDetailScreenProps) {
 
   const deleteGoal = (goalId: string) => {
     setIndividualGoals(prev => prev.filter(g => g.id !== goalId));
+  };
+
+  const startEditingGoal = (goal: IndividualGoal) => {
+    setEditingGoal(goal.id);
+    setEditTitle(goal.title);
+    setEditDescription(goal.description || '');
+    setEditDeadline(goal.deadline ? goal.deadline.toISOString().slice(0, 16) : '');
+  };
+
+  const saveEditedGoal = () => {
+    if (!editingGoal || !editTitle.trim()) return;
+
+    setIndividualGoals(prev => 
+      prev.map(g => 
+        g.id === editingGoal 
+          ? {
+              ...g,
+              title: editTitle,
+              description: editDescription,
+              deadline: editDeadline ? new Date(editDeadline) : undefined
+            }
+          : g
+      )
+    );
+    
+    setEditingGoal(null);
+    setEditTitle('');
+    setEditDescription('');
+    setEditDeadline('');
+  };
+
+  const cancelEditing = () => {
+    setEditingGoal(null);
+    setEditTitle('');
+    setEditDescription('');
+    setEditDeadline('');
   };
 
   const formatDeadline = (deadline?: Date) => {
@@ -157,38 +197,76 @@ export function GoalDetailScreen({ goal, onBack }: GoalDetailScreenProps) {
                 {individualGoal.completed && <Check className="w-3 h-3 text-white" />}
               </button>
 
-              {/* Goal Content */}
+              {/* Goal Content - Editable */}
               <div className="flex-1 min-w-0">
-                <h3 className={`font-medium ${individualGoal.completed ? 'line-through text-muted-foreground' : ''}`}>
-                  {individualGoal.title}
-                </h3>
-                {individualGoal.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {individualGoal.description}
-                  </p>
-                )}
-                <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatDeadline(individualGoal.deadline)}
+                {editingGoal === individualGoal.id ? (
+                  <div className="space-y-2">
+                    <Input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="font-medium"
+                    />
+                    <Textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Description (optional)"
+                      className="min-h-16"
+                    />
+                    <Input
+                      type="datetime-local"
+                      value={editDeadline}
+                      onChange={(e) => setEditDeadline(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <Button onClick={saveEditedGoal} size="sm">
+                        Save
+                      </Button>
+                      <Button onClick={cancelEditing} variant="outline" size="sm">
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <>
+                    <h3 className={`font-medium ${individualGoal.completed ? 'line-through text-muted-foreground' : ''}`}>
+                      {individualGoal.title}
+                    </h3>
+                    {individualGoal.description && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {individualGoal.description}
+                      </p>
+                    )}
+                    <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDeadline(individualGoal.deadline)}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Actions */}
-              <div className="flex gap-1">
-                <Button variant="ghost" size="icon" className="w-8 h-8">
-                  <Edit2 className="w-3 h-3" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="w-8 h-8 text-destructive hover:text-destructive"
-                  onClick={() => deleteGoal(individualGoal.id)}
-                >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
+              {editingGoal !== individualGoal.id && (
+                <div className="flex gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="w-8 h-8"
+                    onClick={() => startEditingGoal(individualGoal)}
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="w-8 h-8 text-destructive hover:text-destructive"
+                    onClick={() => deleteGoal(individualGoal.id)}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         ))}

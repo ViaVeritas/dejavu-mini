@@ -110,8 +110,8 @@ export function CategoryChatPanel({ isOpen, onClose, goal }: CategoryChatPanelPr
             ))}
           </div>
 
-          {/* Input */}
-          <div className="flex gap-2">
+          {/* Input - Raised from bottom edge */}
+          <div className="flex gap-2 mb-4">
             <Input
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
