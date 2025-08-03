@@ -84,7 +84,7 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
 const CentralHubNode = () => {
   return (
     <div className="relative">
-      {/* Left side handles */}
+      {/* Left side handles - for OUTPUT categories */}
       <Handle
         type="target"
         position={Position.Left}
@@ -97,7 +97,7 @@ const CentralHubNode = () => {
         id="source-to-add-output-button"
         style={{ background: 'hsl(var(--border))', width: 8, height: 8 }}
       />
-      {/* Right side handles */}
+      {/* Right side handles - for INPUT categories */}
       <Handle
         type="target"
         position={Position.Right}
