@@ -268,7 +268,7 @@ export function LabScreen() {
     
     // Connect from central hub to input button
     newEdges.push({
-      id: 'edge-hub-to-add-input',
+      id: 'edge-add-input-to-hub',
       source: 'add-input',
       target: 'central-hub',
       type: 'smoothstep',
