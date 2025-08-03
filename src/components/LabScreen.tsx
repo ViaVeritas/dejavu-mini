@@ -188,6 +188,7 @@ export function LabScreen() {
     const newEdges: Edge[] = [];
     
     const centerX = 400;
+    const centerX = 320;
     let currentY = 100;
     const nodeSpacing = 70;
     
