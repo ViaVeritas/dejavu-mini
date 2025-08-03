@@ -14,7 +14,7 @@ interface GoalCardProps {
 
 export function GoalCard({ goal }: GoalCardProps) {
   return (
-    <div className="bg-card border-2 border-border rounded-xl p-4 flex items-center justify-between">
+    <div className="bg-card border-2 border-border rounded-xl p-4 flex items-center justify-between w-48">
       <div>
         <h3 className="font-medium text-sm">{goal.title}</h3>
         <p className="text-xs text-muted-foreground">{goal.goalCount} goals</p>

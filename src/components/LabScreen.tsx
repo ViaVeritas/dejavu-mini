@@ -64,7 +64,7 @@ const AddButtonNode = ({ data }: { data: { type: 'input' | 'output'; onAdd: (typ
         onClick={handleClick}
         variant="outline"
         size="sm"
-        className="rounded-full flex items-center gap-2"
+        className="rounded-full flex items-center gap-2 w-48"
       >
         <div className="w-6 h-6 bg-foreground text-background rounded-full flex items-center justify-center">
           <Plus className="w-4 h-4" />
@@ -197,7 +197,7 @@ export function LabScreen() {
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: centerX, y: currentY },
+        position: { x: centerX - 96, y: currentY },
         data: { goal },
       });
       
@@ -225,7 +225,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-output',
       type: 'addButton',
-      position: { x: centerX, y: currentY },
+      position: { x: centerX - 96, y: currentY },
       data: { type: 'output' as const, onAdd: addGoal },
     });
     
@@ -252,7 +252,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'central-hub',
       type: 'centralHub',
-      position: { x: centerX, y: currentY },
+      position: { x: centerX - 10, y: currentY },
       data: {},
     });
     
@@ -262,7 +262,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-input',
       type: 'addButton',
-      position: { x: centerX + 120, y: currentY },
+      position: { x: centerX + 58, y: currentY },
       data: { type: 'input' as const, onAdd: addGoal },
     });
     
@@ -291,7 +291,7 @@ export function LabScreen() {
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: centerX + 120, y: currentY },
+        position: { x: centerX + 58, y: currentY },
         data: { goal },
       });
       
