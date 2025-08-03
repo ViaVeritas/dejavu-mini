@@ -9,6 +9,7 @@ import ReactFlow, {
   Controls,
   Background,
   NodeTypes,
+  MarkerType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { Plus, MessageCircle, User } from 'lucide-react';
@@ -114,35 +115,43 @@ const nodeTypes: NodeTypes = {
 };
 
 export function LabScreen() {
-  console.log('=== LabScreen rendering ===');
-  
-  const [goals, setGoals] = useState<Goal[]>([
+  // Load initial state from localStorage or use default
+  const [goals, setGoals] = useState<Goal[]>(() => {
+    const saved = localStorage.getItem('dejavu-lab-goals');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved goals:', e);
+      }
+    }
+    return [
     { id: '1', title: 'CSE201 Project 4', goalCount: 13, type: 'output' },
     { id: '2', title: 'Complete database overhaul', goalCount: 10, type: 'output' },
     { id: '3', title: '$5K in MRR', goalCount: 4, type: 'output' },
     { id: '4', title: 'Rest and Sleep', goalCount: 5, type: 'input' },
     { id: '5', title: 'Hydration and Nutrition', goalCount: 4, type: 'input' },
     { id: '6', title: 'Recreation', goalCount: 3, type: 'input' },
-  ]);
+    ];
+  });
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+  // Save goals to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('dejavu-lab-goals', JSON.stringify(goals));
+  }, [goals]);
+
   // Stable addGoal function using useCallback
   const addGoal = useCallback((type: 'input' | 'output') => {
-    console.log('=== addGoal called ===', { type });
-    
     setGoals(prevGoals => {
-      console.log('Previous goals:', prevGoals);
-      
       const newGoal: Goal = {
         id: Date.now().toString(),
         title: type === 'output' ? 'New Output Category' : 'New Input Category',
         goalCount: 0,
         type
       };
-      
-      console.log('New goal created:', newGoal);
       
       let newGoals: Goal[];
       
@@ -151,24 +160,19 @@ export function LabScreen() {
         const outputGoals = prevGoals.filter(g => g.type === 'output');
         const inputGoals = prevGoals.filter(g => g.type === 'input');
         newGoals = [...outputGoals, newGoal, ...inputGoals];
-        console.log('Added output goal at bottom of outputs');
       } else {
         // Add input goals at the beginning of inputs (top of stack)
         const outputGoals = prevGoals.filter(g => g.type === 'output');
         const inputGoals = prevGoals.filter(g => g.type === 'input');
         newGoals = [...outputGoals, newGoal, ...inputGoals];
-        console.log('Added input goal at top of inputs');
       }
       
-      console.log('New goals array:', newGoals);
       return newGoals;
     });
   }, []);
 
   // Generate nodes and edges from goals state
   useEffect(() => {
-    console.log('=== Generating nodes and edges from goals ===', goals);
-    
     const outputGoals = goals.filter(g => g.type === 'output');
     const inputGoals = goals.filter(g => g.type === 'input');
     
@@ -193,14 +197,19 @@ export function LabScreen() {
         type: 'smoothstep',
         sourceHandle: 'right',
         targetHandle: 'left',
-        style: { stroke: 'hsl(var(--border))' },
+        style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: 'hsl(var(--border))',
+        },
       });
     });
     
     // Add output button (left side)
     const outputButtonY = 100 + outputGoals.length * 80;
     newNodes.push({
-      id: 'add-output',
       type: 'addButton',
       position: { x: 50, y: outputButtonY },
       data: { type: 'output' as const, onAdd: addGoal },
@@ -214,7 +223,13 @@ export function LabScreen() {
       type: 'smoothstep',
       sourceHandle: 'right',
       targetHandle: 'left',
-      style: { stroke: 'hsl(var(--border))' },
+      style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: 'hsl(var(--border))',
+      },
     });
     
     // Central hub (center)
@@ -229,7 +244,6 @@ export function LabScreen() {
     // Add input button (right side)
     const inputButtonY = centralHubY + 100;
     newNodes.push({
-      id: 'add-input',
       type: 'addButton',
       position: { x: 750, y: inputButtonY },
       data: { type: 'input' as const, onAdd: addGoal },
@@ -243,7 +257,13 @@ export function LabScreen() {
       type: 'smoothstep',
       sourceHandle: 'right',
       targetHandle: 'left',
-      style: { stroke: 'hsl(var(--border))' },
+      style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 20,
+        height: 20,
+        color: 'hsl(var(--border))',
+      },
     });
     
     // Create input goal nodes (right side)
@@ -264,19 +284,19 @@ export function LabScreen() {
         type: 'smoothstep',
         sourceHandle: 'right',
         targetHandle: 'left',
-        style: { stroke: 'hsl(var(--border))' },
+        style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          width: 20,
+          height: 20,
+          color: 'hsl(var(--border))',
+        },
       });
     });
-    
-    console.log('Generated nodes:', newNodes);
-    console.log('Generated edges:', newEdges);
     
     setNodes(newNodes);
     setEdges(newEdges);
   }, [goals, addGoal, setNodes, setEdges]);
-
-  const outputGoals = goals.filter(g => g.type === 'output');
-  const inputGoals = goals.filter(g => g.type === 'input');
 
   return (
     <div className="min-h-screen bg-background">
@@ -293,16 +313,6 @@ export function LabScreen() {
           <Controls />
           <Background />
         </ReactFlow>
-      </div>
-
-      {/* Debug Info */}
-      <div className="fixed bottom-20 left-4 p-4 bg-muted rounded-lg text-xs">
-        <h3 className="font-semibold mb-2">Debug Info:</h3>
-        <p>Total goals: {goals.length}</p>
-        <p>Output goals: {outputGoals.length}</p>
-        <p>Input goals: {inputGoals.length}</p>
-        <p>Nodes: {nodes.length}</p>
-        <p>Edges: {edges.length}</p>
       </div>
     </div>
   );
