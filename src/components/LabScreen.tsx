@@ -40,6 +40,15 @@ const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
   const handleType = goal.type === 'output' ? 'target' : 'source';
   const handleId = goal.type === 'output' ? 'target-left' : 'source-right';
 
+  const handleChatClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedChatGoal(goal);
+  };
+
+  const handleCardClick = () => {
+    setSelectedDetailGoal(goal);
+  };
+
   return (
     <div className="relative">
       <Handle
@@ -50,8 +59,8 @@ const GoalCardNode = ({ data }: { data: { goal: Goal } }) => {
       />
       <GoalCard 
         goal={goal} 
-        onChatClick={setSelectedChatGoal}
-        onCardClick={setSelectedDetailGoal}
+        onChatClick={handleChatClick}
+        onCardClick={handleCardClick}
       />
     </div>
   );
