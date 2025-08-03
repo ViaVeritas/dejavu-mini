@@ -10,8 +10,6 @@ interface Goal {
 
 interface GoalCardProps {
   goal: Goal;
-  onChatClick?: (e: React.MouseEvent) => void;
-  onCardClick?: () => void;
   onChatClick?: (goal: Goal) => void;
   onCardClick?: (goal: Goal) => void;
 }
@@ -29,7 +27,6 @@ export function GoalCard({ goal, onChatClick, onCardClick }: GoalCardProps) {
   return (
     <div 
       className="bg-card border-2 border-border rounded-xl p-4 flex items-center justify-between w-56 cursor-pointer hover:bg-accent transition-colors"
-      onClick={onCardClick}
       onClick={handleCardClick}
     >
       <div>
@@ -37,9 +34,6 @@ export function GoalCard({ goal, onChatClick, onCardClick }: GoalCardProps) {
         <p className="text-xs text-muted-foreground">{goal.goalCount} goals</p>
       </div>
       <button 
-        className="w-8 h-8 bg-background border border-border rounded-lg flex items-center justify-center hover:bg-accent transition-colors"
-        onClick={onChatClick}
-      >
         className="w-8 h-8 bg-background border border-border rounded-lg flex items-center justify-center hover:bg-accent transition-colors"
         onClick={handleChatClick}
       >
