@@ -262,7 +262,7 @@ export function LabScreen() {
     newNodes.push({
       id: 'add-input',
       type: 'addButton',
-      position: { x: centerX, y: currentY },
+      position: { x: centerX + 120, y: currentY },
       data: { type: 'input' as const, onAdd: addGoal },
     });
     
@@ -291,7 +291,7 @@ export function LabScreen() {
       newNodes.push({
         id: nodeId,
         type: 'goalCard',
-        position: { x: centerX, y: currentY },
+        position: { x: centerX + 120, y: currentY },
         data: { goal },
       });
       
