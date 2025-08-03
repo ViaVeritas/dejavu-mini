@@ -269,11 +269,11 @@ export function LabScreen() {
     // Connect from central hub to input button
     newEdges.push({
       id: 'edge-hub-to-add-input',
-      source: 'central-hub',
-      target: 'add-input',
+      source: 'add-input',
+      target: 'central-hub',
       type: 'smoothstep',
-      sourceHandle: 'source-to-add-input-button',
-      targetHandle: 'target-right',
+      sourceHandle: 'source-right',
+      targetHandle: 'target-from-input-goals',
       style: { stroke: 'hsl(var(--border))', strokeWidth: 2 },
       markerEnd: {
         type: MarkerType.ArrowClosed,
